@@ -45,11 +45,6 @@ class ArtGraphGCNBoost:
             losses.append(self.get_loss(predicted[id]['artwork'][mask], labels[id][mask]))
         return losses
 
-    def train(self, epochs):
-        for epoch in tqdm(range(0, epochs)):
-            out = self.multi_task_training(epoch)
-        return out
-
     def multi_task_training(self, epoch):
         self.model.train()
 
@@ -62,14 +57,7 @@ class ArtGraphGCNBoost:
 
         train_accuracies = self.get_accuracies(out, self.y, self.train_mask)
 
-        print(f'Epoch: {epoch+1}')
-        for i, train_loss_acc in enumerate(zip(train_losses, train_accuracies)):
-            print(f'\t {self.map_labels[i]} \t {round(train_loss_acc[0].detach().item(), 4)} \t{round(train_loss_acc[1].item(), 2) * 100}%')
-
-        if epoch % 5 == 0:
-            self.test(out)
-
-        return out
+        return out, train_losses, train_accuracies
 
     def test(self, out):
         val_losses = self.get_losses(out, self.y, self.val_mask)
@@ -78,10 +66,4 @@ class ArtGraphGCNBoost:
         val_accuracies = self.get_accuracies(out, self.y, self.val_mask)
         test_accuracies = self.get_accuracies(out, self.y, self.test_mask)
 
-        print(f'*\tOn validation')
-        for i, val_loss_acc in enumerate(zip(val_losses, val_accuracies)):
-            print(f'\t{self.map_labels[i]}\t {round(val_loss_acc[0].detach().item(), 4)} \t {round(val_loss_acc[1].item(), 2) * 100}%')
-
-        print(f'*\tOn test')
-        for i, test_loss_acc in enumerate(zip(test_losses, test_accuracies)):
-            print(f'\t{self.map_labels[i]}\t {round(test_loss_acc[0].detach().item(), 4)} \t {round(test_loss_acc[1].item(), 2) * 100}%')
+        return val_losses, val_accuracies, test_losses, test_accuracies

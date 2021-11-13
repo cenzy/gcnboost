@@ -20,16 +20,16 @@ class GNN(torch.nn.Module):
         return F.log_softmax(x, dim=1)
 
 class MGNN(torch.nn.Module):
-    def __init__(self, operator, hidden_channels, out_channels, metadata, n_layers, dropout):
+    def __init__(self, operator, aggr, hidden_channels, out_channels, metadata, n_layers, dropout):
         super(MGNN, self).__init__()
         self.gnn_artist = GNN(operator, hidden_channels, out_channels['artist'], n_layers, dropout)
-        self.gnn_artist = to_hetero(self.gnn_artist, metadata)
+        self.gnn_artist = to_hetero(self.gnn_artist, metadata, aggr=aggr)
 
         self.gnn_style = GNN(operator, hidden_channels, out_channels['style'], n_layers, dropout)
-        self.gnn_style = to_hetero(self.gnn_style, metadata)
+        self.gnn_style = to_hetero(self.gnn_style, metadata, aggr=aggr)
 
         self.gnn_genre = GNN(operator, hidden_channels, out_channels['genre'], n_layers, dropout)
-        self.gnn_genre = to_hetero(self.gnn_genre, metadata)
+        self.gnn_genre = to_hetero(self.gnn_genre, metadata,aggr=aggr)
 
     def forward(self, x, edge_index):
         return [self.gnn_artist(x, edge_index), self.gnn_style(x, edge_index), self.gnn_genre(x, edge_index)]

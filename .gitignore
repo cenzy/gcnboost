@@ -75,8 +75,9 @@ target/
 # Jupyter NB Checkpoints
 .ipynb_checkpoints/
 
-# exclude data from source control by default
+# exclude data and generated models from source control by default
 /data/
+/models/
 
 # Mac OS-specific storage files
 .DS_Store
@@ -90,3 +91,9 @@ target/
 
 # One-time scripts
 test.py
+
+#mlflow logs
+src/mlruns/
+
+#executions
+src/run_experiment.sh
