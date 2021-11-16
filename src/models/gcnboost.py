@@ -19,6 +19,15 @@ class GNN(torch.nn.Module):
         x = self.conv_out(x, edge_index)
         return F.log_softmax(x, dim=1)
 
+class SGNN(torch.nn.Module):
+    def __init__(self, operator, aggr, hidden_channels, out_channels, metadata, n_layers, dropout):
+        super(MGNN, self).__init__()
+        self.gnn = GNN(operator, hidden_channels, out_channels, n_layers, dropout)
+        self.gnn = to_hetero(self.gnn_artist, metadata, aggr=aggr)
+
+    def forward(self, x, edge_index):
+        return self.gnn(x, edge_index)
+
 class MGNN(torch.nn.Module):
     def __init__(self, operator, aggr, hidden_channels, out_channels, metadata, n_layers, dropout):
         super(MGNN, self).__init__()
