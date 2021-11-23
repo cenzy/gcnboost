@@ -28,7 +28,9 @@ args = parser.parse_args()
 
 gcn = ArtGraphGCNBoost(args, graph_type=args.type, training_mode=args.mode)
 
-mlruns_path = 'file:///home/jbananafish/Desktop/Master/Thesis/code/gcnboost/src/mlruns'
+mlruns_path = 'file://' +  os.path.abspath(os.getcwd()) +  '/mlruns'
+if not os.path.exists(mlruns_path):
+    os.makedirs(mlruns_path)
 mlflow.set_tracking_uri(mlruns_path)
 mlflow.set_experiment(args.exp)
 with mlflow.start_run() as run:
