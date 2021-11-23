@@ -1,0 +1,5 @@
+aggr,dropout,epochs,hidden_units,label,learning_rate,mode,n_layers,operator,type,style_test_accuracy,style_test_loss,style_train_accuracy,style_train_loss,style_val_accuracy,style_val_loss
+mean,0,1000,16,style,0.001,single_task,1,SAGEConv,homo,65,3.8305,95,0.2327,97,0.1038
+mean,0,1000,16,style,0.001,single_task,1,GCNConv,homo,60,1.7959,83,0.6355,82,0.6568
+sum,0,1000,16,style,0.001,single_task,1,SAGEConv,homo,65,3.8305,95,0.2327,97,0.1038
+sum,0,1000,16,style,0.001,single_task,1,GCNConv,homo,60,1.7959,83,0.6355,82,0.6568

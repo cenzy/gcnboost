@@ -1,0 +1,5 @@
+aggr,dropout,epochs,hidden_units,label,learning_rate,mode,n_layers,operator,type,genre_test_accuracy,genre_test_loss,genre_train_accuracy,genre_train_loss,genre_val_accuracy,genre_val_loss
+mean,0,1000,16,genre,0.001,single_task,1,SAGEConv,homo,67,3.3847,95,0.1861,98,0.088
+mean,0,1000,16,genre,0.001,single_task,1,GCNConv,homo,65,1.543,85,0.5083,83,0.6313
+sum,0,1000,16,genre,0.001,single_task,1,SAGEConv,homo,67,3.3847,95,0.1861,98,0.088
+sum,0,1000,16,genre,0.001,single_task,1,GCNConv,homo,65,1.543,85,0.5083,83,0.6313

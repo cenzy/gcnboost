@@ -1,0 +1,5 @@
+aggr,dropout,epochs,hidden_units,label,learning_rate,mode,n_layers,operator,type,artist_test_accuracy,artist_test_loss,artist_train_accuracy,artist_train_loss,artist_val_accuracy,artist_val_loss,genre_test_accuracy,genre_test_loss,genre_train_accuracy,genre_train_loss,genre_val_accuracy,genre_val_loss,style_test_accuracy,style_test_loss,style_train_accuracy,style_train_loss,style_val_accuracy,style_val_loss
+mean,0,1000,16,all,0.001,multi_task,1,SAGEConv,homo,56,4.0756,87,0.6055,86,0.4558,66,3.3378,95,0.1753,98,0.0801,65,3.9163,95,0.2174,97,0.1033
+mean,0,1000,16,all,0.001,multi_task,1,GCNConv,homo,45,2.9329,71,1.2429,60,1.5209,65,1.5593,86,0.4904,84,0.6076,61,1.7923,83,0.632,83,0.6208
+sum,0,1000,16,all,0.001,multi_task,1,SAGEConv,homo,56,4.0756,87,0.6055,86,0.4558,66,3.3378,95,0.1753,98,0.0801,65,3.9163,95,0.2174,97,0.1033
+sum,0,1000,16,all,0.001,multi_task,1,GCNConv,homo,45,2.9329,71,1.2429,60,1.5209,65,1.5593,86,0.4904,84,0.6076,61,1.7923,83,0.632,83,0.6208
