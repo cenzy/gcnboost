@@ -12,18 +12,21 @@ from artgraph_gcnboost import ArtGraphGCNBoost
 torch.manual_seed(1)
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--exp', type=str, default='default', help='Experiment name.')
-parser.add_argument('--type', type=str, default='hetero', help='Graph type (hetero|homo).')
-parser.add_argument('--mode', type=str, default='multi_task', help='Training mode (multi_task|single_task).')
-parser.add_argument('--label', type=str, default='all', help='Label to predict (artist|style|genre).')
-parser.add_argument('--epochs', type=int, default=1, help='Number of epochs to train.')
-parser.add_argument('--lr', type=float, default=0.001, help='Initial learning rate.')
+parser.add_argument('--exp', type=str, default='test', help='Experiment name.')
+parser.add_argument('--type', type=str, default='homo', help='Graph type (hetero|homo).')
+parser.add_argument('--mode', type=str, default='single_task', help='Training mode (multi_task|single_task).')
+parser.add_argument('--label', type=str, default='artist', help='Label to predict (artist|style|genre).')
+parser.add_argument('--epochs', type=int, default=500, help='Number of epochs to train.')
+parser.add_argument('--lr', type=float, default=0.01, help='Initial learning rate.')
 parser.add_argument('--hidden', type=int, default=16, help='Number of hidden units.')
-parser.add_argument('--nlayers', type=int, default=1, help='Number of layers.')
-parser.add_argument('--dropout', type=float, default=0, help='Dropout rate (1 - keep probability).')
+parser.add_argument('--nlayers', type=int, default=2, help='Number of layers.')
+parser.add_argument('--dropout', type=float, default=0.3, help='Dropout rate (1 - keep probability).')
 parser.add_argument('--operator', type=str, default='SAGEConv', help='The graph convolutional operator.')
+parser.add_argument('--activation', type=str, default='relu', help='The activation function.')
 parser.add_argument('--aggr', type=str, default='sum', help='Aggregation function.')
-parser.add_argument('--skip', action='store_true', default='False', help='Add skip connection.')
+parser.add_argument('--skip', action='store_true', default='True', help='Add skip connection.')
+parser.add_argument('--bn', action='store_true', default='True', help='Add batch normalization.')
+parser.add_argument('--wd', type=float, default=3e-4, help='Weight decay.')
 args = parser.parse_args()
 
 gcn = ArtGraphGCNBoost(args, graph_type=args.type, training_mode=args.mode)
@@ -44,11 +47,15 @@ with mlflow.start_run() as run:
     mlflow.log_param('dropout', args.dropout)
     mlflow.log_param('operator', args.operator)
     mlflow.log_param('aggr', args.aggr)
+    mlflow.log_param('bn', args.bn)
+    mlflow.log_param('skip', args.skip)
+    mlflow.log_param('activation_function', args.activation)
+    mlflow.log_param('weight_decay', args.wd)
     
     for epoch in tqdm(range(0, args.epochs)):
         if args.type == 'hetero':
             out, train_losses, train_accuracies = gcn.hetero_training()
-            val_losses, val_accuracies, test_losses, test_accuracies = gcn.hetero_test(out)
+            val_losses, val_accuracies, test_losses, test_accuracies = gcn.hetero_test()
             if args.mode == 'multi_task':
                 for i, train_loss_acc in enumerate(zip(train_losses, train_accuracies)):
                     mlflow.log_metric(f'{gcn.map_id2labels[i]}_train_loss', round(train_loss_acc[0].detach().item(), 4), step=epoch)

@@ -17,6 +17,11 @@ class ArtGraphGCNBoost:
         'GCNConv': operators.GCNConv
     }
 
+    activation_registry = {
+        'relu': torch.nn.ReLU(),
+        'prelu': torch.nn.PReLU()
+    }
+
     map_id2labels = {
         0: 'artist',
         1: 'style',
@@ -71,48 +76,56 @@ class ArtGraphGCNBoost:
             
         if self.graph_type == 'hetero':
             if self.traning_mode == 'multi_task':
-                model = HeteroMGNN(operator=self.operator_registry[args.operator], 
-                             aggr=args.aggr, 
-                             hidden_channels=args.hidden, 
-                             out_channels=base_data.num_classes, 
-                             metadata=data.metadata(),
-                             n_layers=args.nlayers, 
-                             dropout=args.dropout,
-                             skip=args.skip)
+                model = HeteroMGNN(metadata=data.metadata(),
+                                    aggr=args.aggr, 
+                                    operator=self.operator_registry[args.operator], 
+                                    activation=self.activation_registry[args.activation],
+                                    hidden_channels=args.hidden, 
+                                    out_channels=base_data.num_classes, 
+                                    num_layers=args.nlayers, 
+                                    dropout=args.dropout,
+                                    bn=args.bn,
+                                    skip=args.skip)
                 y = torch.stack([base_data[0]['artwork'].y_artist, base_data[0]['artwork'].y_style, base_data[0]['artwork'].y_genre])
             if self.traning_mode == 'single_task':
-                model = HeteroSGNN(operator=self.operator_registry[args.operator], 
-                             aggr=args.aggr, 
-                             hidden_channels=args.hidden, 
-                             out_channels=base_data.num_classes[args.label], 
-                             metadata=data.metadata(),
-                             n_layers=args.nlayers, 
-                             dropout=args.dropout,
-                             skip=args.skip)
+                model = HeteroSGNN(metadata=data.metadata(),
+                                    aggr=args.aggr, 
+                                    operator=self.operator_registry[args.operator],
+                                    activation=self.activation_registry[args.activation], 
+                                    hidden_channels=args.hidden, 
+                                    out_channels=base_data.num_classes[args.label], 
+                                    num_layers=args.nlayers, 
+                                    dropout=args.dropout,
+                                    bn=args.bn,
+                                    skip=args.skip)
                 y = torch.stack([base_data[0]['artwork'][f'y_{args.label}']])
         
         if self.graph_type == 'homo':
             data = data.to_homogeneous()
             if self.traning_mode == 'multi_task':
                 model = HomoMGNN(operator=self.operator_registry[args.operator],
+                                 activation=self.activation_registry[args.activation],
                                  input_channels=base_data.num_features,
                                  hidden_channels=args.hidden,
                                  out_channels=base_data.num_classes,
-                                 n_layers=args.nlayers,
+                                 num_layers=args.nlayers,
                                  dropout=args.dropout,
+                                 bn=args.bn,
                                  skip=args.skip)
                 y = torch.stack([base_data[0]['artwork'].y_artist, base_data[0]['artwork'].y_style, base_data[0]['artwork'].y_genre])
             if self.traning_mode == 'single_task':
                 model = HomoSGNN(operator=self.operator_registry[args.operator],
+                                 activation=self.activation_registry[args.activation],
                                  input_channels=base_data.num_features,
                                  hidden_channels=args.hidden,
                                  out_channels=base_data.num_classes[args.label],
-                                 n_layers=args.nlayers,
+                                 num_layers=args.nlayers,
                                  dropout=args.dropout,
+                                 bn=args.bn,
                                  skip=args.skip)
                 y = torch.stack([base_data[0]['artwork'][f'y_{args.label}']])
         
-        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=3e-4)
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.wd)
         
         return base_data, data, y, model, optimizer
 
@@ -178,7 +191,10 @@ class ArtGraphGCNBoost:
 
         return out, train_losses, train_accuracies
         
-    def hetero_test(self, out):
+    @torch.no_grad()
+    def hetero_test(self):
+        self.model.eval()
+        out = self.model(self.data.x_dict, self.data.edge_index_dict)
         val_losses = self.get_losses(out, self.y, self.val_mask)
         test_losses = self.get_losses(out, self.y, self.test_mask)
 
@@ -187,7 +203,10 @@ class ArtGraphGCNBoost:
 
         return val_losses, val_accuracies, test_losses, test_accuracies
 
-    def homo_test(self, out):
+    @torch.no_grad()
+    def homo_test(self):
+        self.model.eval()
+        out = self.model(self.data.x.cuda(), self.data.edge_index.cuda())
         val_losses = self.get_losses_homo(out, self.y, self.val_mask)
         test_losses = self.get_losses_homo(out, self.y, self.test_mask)
 
