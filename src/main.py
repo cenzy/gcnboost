@@ -13,27 +13,27 @@ torch.manual_seed(1)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--exp', type=str, default='test', help='Experiment name.')
-parser.add_argument('--type', type=str, default='homo', help='Graph type (hetero|homo).')
-parser.add_argument('--mode', type=str, default='single_task', help='Training mode (multi_task|single_task).')
-parser.add_argument('--label', type=str, default='artist', help='Label to predict (artist|style|genre).')
-parser.add_argument('--epochs', type=int, default=500, help='Number of epochs to train.')
+parser.add_argument('--type', type=str, default='hetero', help='Graph type (hetero|homo).')
+parser.add_argument('--mode', type=str, default='multi_task', help='Training mode (multi_task|single_task).')
+parser.add_argument('--label', type=str, default='all', help='Label to predict (artist|style|genre).')
+parser.add_argument('--epochs', type=int, default=100, help='Number of epochs to train.')
 parser.add_argument('--lr', type=float, default=0.01, help='Initial learning rate.')
 parser.add_argument('--hidden', type=int, default=16, help='Number of hidden units.')
-parser.add_argument('--nlayers', type=int, default=2, help='Number of layers.')
+parser.add_argument('--nlayers', type=int, default=1, help='Number of layers.')
 parser.add_argument('--dropout', type=float, default=0.3, help='Dropout rate (1 - keep probability).')
 parser.add_argument('--operator', type=str, default='SAGEConv', help='The graph convolutional operator.')
 parser.add_argument('--activation', type=str, default='relu', help='The activation function.')
 parser.add_argument('--aggr', type=str, default='sum', help='Aggregation function.')
-parser.add_argument('--skip', action='store_true', default='True', help='Add skip connection.')
-parser.add_argument('--bn', action='store_true', default='True', help='Add batch normalization.')
+parser.add_argument('--skip', action='store_true', default='False', help='Add skip connection.')
+parser.add_argument('--bn', action='store_true', default='False', help='Add batch normalization.')
 parser.add_argument('--wd', type=float, default=3e-4, help='Weight decay.')
 args = parser.parse_args()
 
 gcn = ArtGraphGCNBoost(args, graph_type=args.type, training_mode=args.mode)
 
 mlruns_path = 'file://' +  os.path.abspath(os.getcwd()) +  '/mlruns'
-if not os.path.exists(mlruns_path):
-    os.makedirs(mlruns_path)
+#if not os.path.exists(mlruns_path):
+#    os.makedirs(mlruns_path)
 mlflow.set_tracking_uri(mlruns_path)
 mlflow.set_experiment(args.exp)
 with mlflow.start_run() as run:
